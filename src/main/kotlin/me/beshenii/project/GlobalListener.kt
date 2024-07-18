@@ -8,5 +8,6 @@ object GlobalListener : Listener {
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
+
     }
 }
