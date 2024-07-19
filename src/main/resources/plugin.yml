@@ -9,6 +9,5 @@ libraries:
 
 commands:
   host:
-    permission: minecraft.*
-    permission-message: "Нет прав."
+    permission: *
 
