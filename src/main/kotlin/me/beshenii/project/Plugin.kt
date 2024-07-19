@@ -3,6 +3,7 @@ package me.beshenii.project
 import me.beshenii.project.StatsLoad.load
 import me.beshenii.project.StatsLoad.save
 import me.beshenii.project.command.ExampleCommand
+import me.beshenii.project.command.HostCommand
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -17,7 +18,7 @@ class Plugin : JavaPlugin() {
 
         Bukkit.getPluginManager().registerEvents(GlobalListener, this)
 
-        plugin.getCommand("")!!.setExecutor(ExampleCommand)
+        plugin.getCommand("host")!!.setExecutor(HostCommand)
     }
 
     override fun onDisable() {
