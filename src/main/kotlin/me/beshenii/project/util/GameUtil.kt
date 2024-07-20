@@ -1,8 +1,11 @@
 package me.beshenii.project.util
 
 import kotlinx.serialization.Serializable
+import me.beshenii.project.util.other.color
 import me.beshenii.project.util.other.plain
+import me.beshenii.project.util.other.plus
 import me.beshenii.project.util.other.runTaskTimer
+import net.kyori.adventure.text.Component.text
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket
 import net.minecraft.server.level.ServerLevel
@@ -40,6 +43,10 @@ fun Location.setBlockDestruction(source: Player, progress: Int, showToEveryone: 
 
 var cur_game: String? = null
 var cur_status: String? = null
+var queue_players: MutableList<Player> = mutableListOf()
+
+var max_players = 0
+var min_players = 0
 
 val queue_join = item(Material.GRAY_DYE) {
     this.displayName(plain("Войти в очередь"))
@@ -48,7 +55,7 @@ val queue_join = item(Material.GRAY_DYE) {
 
 val queue_exit = item(Material.LIME_DYE) {
     this.displayName(plain("Покинуть очередь"))
-    this.persistentDataContainer[key("queue"), PersistentDataType.STRING] = "leave"
+    this.persistentDataContainer[key("queue"), PersistentDataType.STRING] = "exit"
 }
 
 @Serializable
@@ -56,6 +63,7 @@ class PlayerSave
 
 fun hostQueue() {
     val players = Bukkit.getOnlinePlayers()
+    queue_players = mutableListOf()
     players.forEach { player: Player ->
         player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, SoundCategory.AMBIENT, 10f, 1.2f)
         player.sendMessage("Начинается игра \"$cur_game\"! Для входа в очередь нажмите ПКМ, держа краситель.")
@@ -63,9 +71,23 @@ fun hostQueue() {
     }
 
     cur_status = "queue"
-    var timer = 50.0
+    val max = 40
+    var timer = max
 
-    runTaskTimer(0.5.seconds) {
+    val server = Bukkit.getServer()
+
+    runTaskTimer(1.seconds) {
+        val size = queue_players.size
+        if (size < min_players) {
+            timer = max
+            server.sendActionBar(text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players]").color(0x878787))
+        } else {
+            timer -= 1
+            if (size == max_players && timer > 5) {
+                timer = 5
+            }
+            server.sendActionBar(text("Игра начнётся через ") + text("$timer секунд.").color(0x91dceb))
+        }
 
     }
 

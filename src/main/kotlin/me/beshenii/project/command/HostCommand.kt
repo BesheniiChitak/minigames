@@ -3,6 +3,8 @@ package me.beshenii.project.command
 import me.beshenii.project.games
 import me.beshenii.project.util.cur_game
 import me.beshenii.project.util.hostQueue
+import me.beshenii.project.util.max_players
+import me.beshenii.project.util.min_players
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -11,8 +13,6 @@ import org.bukkit.command.TabCompleter
 object HostCommand : CommandExecutor, TabCompleter {
     override fun onCommand(sender: CommandSender, command: Command, s: String, args: Array<String>): Boolean {
         if (args.size < 1) return false
-        val max = args.getOrNull(1) ?: 16
-        val min = args.getOrNull(2) ?: 2
         if (cur_game != null) {
             sender.sendMessage("Игра уже запущена.")
             return false
@@ -21,6 +21,8 @@ object HostCommand : CommandExecutor, TabCompleter {
         if (game in games) {
             sender.sendMessage("Успешный хост.")
             cur_game = game
+            max_players = args.getOrNull(1)?.toIntOrNull() ?: 16
+            min_players = args.getOrNull(2)?.toIntOrNull() ?: 2
             hostQueue()
         }
         return true

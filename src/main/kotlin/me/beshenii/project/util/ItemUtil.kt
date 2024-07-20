@@ -1,8 +1,8 @@
 package me.beshenii.project.util
 
 import me.beshenii.project.plugin
-import me.beshenii.project.util.other.*
-import net.kyori.adventure.text.Component.text
+import me.beshenii.project.util.other.Text
+import me.beshenii.project.util.other.plain
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -20,14 +20,6 @@ fun ItemStack.tagItem(tags: Map<String, *>): ItemStack {
     return this.tagPlacement(tags)
 }
 
-val nextPageItem = item(Material.SPECTRAL_ARROW, 1) {
-    this.displayName(plain("Следующая страница"))
-}
-
-val previousPageItem = item(Material.SPECTRAL_ARROW, 1) {
-    this.displayName(plain("Предыдущая страница"))
-}
-
 fun ItemStack.tagPlacement(tags: Map<String, *>): ItemStack {
     tags.forEach { (key, value) ->
         this.editMeta {
@@ -43,12 +35,6 @@ fun ItemStack.tagPlacement(tags: Map<String, *>): ItemStack {
                     NamespacedKey(plugin, key),
                     PersistentDataType.STRING,
                     value
-                )
-
-                is Map<*, *> -> it.persistentDataContainer.set(
-                    NamespacedKey(plugin, key),
-                    PersistentDataType.STRING,
-                    value.mapToString()
                 )
             }
         }
@@ -89,45 +75,6 @@ fun ItemStack.data(modeldata: Int): ItemStack {
         it.setCustomModelData(modeldata)
     }
     return this
-}
-
-var allItems = mapOf(
-    "mithril_ingot" to doneItem(Material.IRON_INGOT, epicLore * materialLore, "Слиток мифрила", 1),
-    "orichalcum_ingot" to doneItem(Material.IRON_INGOT, epicLore * materialLore, "Слиток орихалка", 2),
-    "tungsten_ingot" to doneItem(Material.IRON_INGOT, epicLore * materialLore, "Слиток вольфрама", 3),
-    "silver_ingot" to doneItem(Material.IRON_INGOT, rareLore * materialLore, "Слиток серебра", 4),
-    "galvorn_ingot" to doneItem(Material.IRON_INGOT, mythicLore * materialLore, "Слиток галворна", 5),
-    "meteorite_iron_ingot" to doneItem(
-        Material.IRON_INGOT,
-        legendaryLore * materialLore,
-        "Слиток метеоритного железа",
-        6
-    ),
-    "cobalt_ingot" to doneItem(Material.IRON_INGOT, legendaryLore * materialLore, "Слиток кобальта", 7),
-    "lead_ingot" to doneItem(Material.IRON_INGOT, uncommonLore * materialLore, "Слиток свинца", 8)
-)
-
-fun getItem(id: String): ItemStack {
-    val item: ItemStack
-    val loreID: String
-    val customItem = allItems[id.lowercase()]?.clone()
-    if (customItem != null) {
-        item = customItem
-        loreID = "mmo"
-    } else {
-        item = try {
-            ItemStack(Material.valueOf(id.uppercase()))
-        } catch(error: Exception) {
-            item(ItemStack(Material.DIRT)) {
-                displayName(text("бляяяять такого предмета не существует (${error})"))
-            }
-        }
-        loreID = "vanilla"
-    }
-    val lore = item.lore() ?: mutableListOf()
-    lore.add(plain("$loreID:${id.lowercase()}").color(0x555555))
-    item.lore(lore)
-    return item.tagItem(mapOf("material" to id))
 }
 
 fun key(key: String) : NamespacedKey = NamespacedKey(plugin, key)
