@@ -53,6 +53,8 @@ var game_players: MutableList<Player> = mutableListOf()
 var max_players = 0
 var min_players = 0
 
+val settings = mutableMapOf<String, String>()
+
 val queue_join = item(Material.GRAY_DYE) {
     this.displayName(plain("Войти в очередь"))
     this.persistentDataContainer[key("queue"), PersistentDataType.STRING] = "join"

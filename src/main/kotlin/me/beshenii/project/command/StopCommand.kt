@@ -16,7 +16,7 @@ object StopCommand : CommandExecutor, TabCompleter {
         sender: CommandSender,
         command: Command,
         alias: String,
-        args: Array<out String>?
+        args: Array<out String>
     ): MutableList<String> {
         return mutableListOf()
     }
