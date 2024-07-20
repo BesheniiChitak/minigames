@@ -24,8 +24,9 @@ object GlobalListener : Listener {
         player.teleport(Bukkit.getWorld("world")!!.spawnLocation)
         player.gameMode = GameMode.ADVENTURE
 
-        if (cur_status == "queue") {
-            player.inventory.setItem(4, queue_join)
+        when (cur_status) {
+            "queue" -> player.inventory.setItem(4, queue_join)
+            "running" -> player.inventory.setItem(4, spectate)
         }
     }
 
@@ -34,6 +35,7 @@ object GlobalListener : Listener {
         val player = event.player
 
         if (player in queue_players) queue_players.remove(player)
+        if (player in game_players) game_players.remove(player)
     }
 
     @EventHandler
@@ -73,6 +75,12 @@ object GlobalListener : Listener {
                     "exit" -> {
                         event.player.inventory.setItem(4, queue_join)
                         queue_players.remove(event.player)
+                    }
+
+                    "spectate" -> {
+                        player.gameMode = GameMode.SPECTATOR
+                        val loc = Location(Bukkit.getWorld("game"), 0.0, 32.0, 0.0)
+                        player.teleport(loc)
                     }
                 }
             }

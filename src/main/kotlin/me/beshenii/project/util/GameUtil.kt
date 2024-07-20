@@ -17,6 +17,7 @@ import org.bukkit.craftbukkit.v1_20_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_20_R3.block.CraftBlock
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import java.io.File
@@ -45,7 +46,9 @@ fun Location.setBlockDestruction(source: Player, progress: Int, showToEveryone: 
 
 var cur_game: String? = null
 var cur_status: String? = null
+
 var queue_players: MutableList<Player> = mutableListOf()
+var game_players: MutableList<Player> = mutableListOf()
 
 var max_players = 0
 var min_players = 0
@@ -58,6 +61,11 @@ val queue_join = item(Material.GRAY_DYE) {
 val queue_exit = item(Material.LIME_DYE) {
     this.displayName(plain("Покинуть очередь"))
     this.persistentDataContainer[key("queue"), PersistentDataType.STRING] = "exit"
+}
+
+val spectate = item(Material.MAGENTA_DYE) {
+    this.displayName(plain("Наблюдать"))
+    this.persistentDataContainer[key("queue"), PersistentDataType.STRING] = "spectate"
 }
 
 @Serializable
@@ -107,6 +115,9 @@ fun gameRun() {
 
     Bukkit.getOnlinePlayers().forEach {
         it.inventory.clear()
+        if (it !in queue_players) {
+            it.inventory.setItem(4, spectate)
+        }
     }
 
     cur_status = "running"
@@ -121,10 +132,11 @@ fun gameRun() {
         generatorSettings("""{"layers":[],"biome":"the_void"}""")
     })
 
-    val size = queue_players.size
+    game_players = queue_players
+    val size = game_players.size
 
     when (cur_game) {
-        "Столбы" -> {
+        "Столбы", "Столбы_2" -> {
             val center = Location(gameWorld, 0.0, 32.0, 0.0)
             val vector = Vector(0.6, 0.0, 0.0)
             for (i in 1..size) {
@@ -137,12 +149,34 @@ fun gameRun() {
                 }
                 pos.y = 33.5
 
-                val player = queue_players[i - 1]
+                val player = game_players[i - 1]
                 player.teleport(pos)
                 player.gameMode = GameMode.SURVIVAL
             }
         }
     }
 
+    gameHandler()
+}
+
+val itemEntries = Material.entries
+
+fun gameHandler() {
+    when (cur_game) {
+        "Столбы", "Столбы_2" -> {
+            var timer = 0
+            runTaskTimer(1.seconds) {
+                timer++
+                if (timer == 30) {
+                    timer = 0
+                    var item = itemEntries.random()
+                    game_players.forEach { player: Player ->
+                        if (cur_game == "Столбы") item = itemEntries.random()
+                        player.inventory.addItem(ItemStack(item))
+                    }
+                }
+            }
+        }
+    }
 }
 

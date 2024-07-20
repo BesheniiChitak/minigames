@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var plugin: Plugin
 
-val games = listOf("Столбы")
+val games = listOf("Столбы", "Столбы_2")
 
 class Plugin : JavaPlugin() {
 
