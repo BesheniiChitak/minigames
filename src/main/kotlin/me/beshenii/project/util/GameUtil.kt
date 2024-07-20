@@ -1,11 +1,10 @@
 package me.beshenii.project.util
 
 import kotlinx.serialization.Serializable
-import me.beshenii.project.util.other.color
-import me.beshenii.project.util.other.plain
-import me.beshenii.project.util.other.plus
-import me.beshenii.project.util.other.runTaskTimer
+import me.beshenii.project.bossbar
+import me.beshenii.project.util.other.*
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.title.TitlePart
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket
 import net.minecraft.server.level.ServerLevel
@@ -91,7 +90,7 @@ fun hostQueue() {
         if (size < min_players) {
             timer = max
             server.sendActionBar(
-                text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players]").color(
+                text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players/$max_players]").color(
                     0x878787
                 )
             )
@@ -101,6 +100,16 @@ fun hostQueue() {
                 timer = 5
             }
             server.sendActionBar(text("Игра начнётся через ") + text("$timer секунд.").color(0x91dceb))
+            var pitch = 1f
+            if (timer <= 10) {
+                pitch += timer/10
+            }
+            Bukkit.getOnlinePlayers().forEach { player: Player ->
+                player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, pitch)
+                if (timer <= 10 && player !in queue_players && size < max_players) {
+                    player.sendTitlePart(TitlePart.SUBTITLE, text("Ты не в очереди!").color(0xd68d8d))
+                }
+            }
             if (timer <= 0) {
                 gameRun()
                 it.cancel()
@@ -164,15 +173,34 @@ val itemEntries = Material.entries
 fun gameHandler() {
     when (cur_game) {
         "Столбы", "Столбы_2" -> {
-            var timer = 0
+            var timer = 12
             runTaskTimer(1.seconds) {
                 timer++
-                if (timer == 30) {
+                bossbar.progress(timer/15f)
+                bossbar.name(text("До следующего предмета"))
+                if (timer == 15) {
                     timer = 0
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (cur_game == "Столбы") item = itemEntries.random()
                         player.inventory.addItem(ItemStack(item))
+                        player.showBossBar(bossbar)
+                    }
+                }
+                val size = game_players.size
+                val server = Bukkit.getServer()
+                if (size == 1) {
+                    server.sendMessage(text("Победитель: ") + text(game_players[0].name).color(0xc091eb))
+                } else if (size == 0) {
+                    server.sendMessage(text("Все игроки умерли, нет победителя!").color(0xeb91a8))
+                }
+                if (size <= 1) {
+                    cur_status = null
+                    cur_game = null
+                    it.cancel()
+                    Bukkit.getOnlinePlayers().forEach { player: Player ->
+                        player.reset()
+                        player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
                     }
                 }
             }

@@ -1,12 +1,14 @@
 package me.beshenii.project
 
 import me.beshenii.project.util.*
+import me.beshenii.project.util.other.reset
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerCommandSendEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -20,14 +22,9 @@ object GlobalListener : Listener {
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
-        player.inventory.clear()
-        player.teleport(Bukkit.getWorld("world")!!.spawnLocation)
-        player.gameMode = GameMode.ADVENTURE
+        player.reset()
 
-        when (cur_status) {
-            "queue" -> player.inventory.setItem(4, queue_join)
-            "running" -> player.inventory.setItem(4, spectate)
-        }
+
     }
 
     @EventHandler
@@ -39,9 +36,18 @@ object GlobalListener : Listener {
     }
 
     @EventHandler
+    fun onPlayerDeath(event: PlayerDeathEvent) {
+        val player = event.player
+        if (player in game_players) {
+            game_players.remove(player)
+            player.reset()
+        }
+    }
+
+    @EventHandler
     fun onInventoryClick(event: InventoryClickEvent) {
         val item = event.currentItem ?: return
-        val container = item.itemMeta.persistentDataContainer
+        val container = item.itemMeta?.persistentDataContainer ?: return
         if (container[key("queue"), PersistentDataType.STRING] != null) {
             event.isCancelled = true
         } else {
