@@ -10,6 +10,8 @@ lateinit var plugin: Plugin
 
 var cur_game: String? = null
 
+val games = listOf("Столбы")
+
 class Plugin : JavaPlugin() {
 
     override fun onEnable() {

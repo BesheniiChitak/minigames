@@ -1,9 +1,5 @@
 package me.beshenii.project.util.other
 
-import kotlinx.serialization.Serializable
-import net.kyori.adventure.text.Component.text
-import org.bukkit.Bukkit
-
 fun intArrayOf(range: IntRange) =
     IntArray(range.last - range.first + 1) { range.first + it }
 
