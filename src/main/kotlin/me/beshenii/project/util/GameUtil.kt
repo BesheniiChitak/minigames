@@ -18,6 +18,8 @@ import org.bukkit.craftbukkit.v1_20_R3.block.CraftBlock
 import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.util.Vector
+import java.io.File
 import kotlin.time.Duration.Companion.seconds
 
 val Location.blockPos: BlockPos get() = BlockPos(x.toInt(), y.toInt(), z.toInt())
@@ -80,15 +82,66 @@ fun hostQueue() {
         val size = queue_players.size
         if (size < min_players) {
             timer = max
-            server.sendActionBar(text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players]").color(0x878787))
+            server.sendActionBar(
+                text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players]").color(
+                    0x878787
+                )
+            )
         } else {
             timer -= 1
             if (size == max_players && timer > 5) {
                 timer = 5
             }
             server.sendActionBar(text("Игра начнётся через ") + text("$timer секунд.").color(0x91dceb))
+            if (timer <= 0) {
+                gameRun()
+                it.cancel()
+            }
         }
 
+    }
+
+}
+
+fun gameRun() {
+
+    Bukkit.getOnlinePlayers().forEach {
+        it.inventory.clear()
+    }
+
+    cur_status = "running"
+
+    val name = "game"
+
+    Bukkit.unloadWorld(name, false)
+    File(Bukkit.getWorldContainer(), name).deleteRecursively()
+
+    val gameWorld = Bukkit.createWorld(WorldCreator(name).apply {
+        type(WorldType.FLAT)
+        generatorSettings("""{"layers":[],"biome":"the_void"}""")
+    })
+
+    val size = queue_players.size
+
+    when (cur_game) {
+        "Столбы" -> {
+            val center = Location(gameWorld, 0.0, 32.0, 0.0)
+            val vector = Vector(0.6, 0.0, 0.0)
+            for (i in 1..size) {
+                vector.rotateAroundY(360.0 / size)
+                val move = vector.clone().multiply(20 * size / 2)
+                val pos = center.add(move)
+                for (y in -64..32) {
+                    pos.y = y.toDouble()
+                    pos.block.type = Material.BEDROCK
+                }
+                pos.y = 33.5
+
+                val player = queue_players[i - 1]
+                player.teleport(pos)
+                player.gameMode = GameMode.SURVIVAL
+            }
+        }
     }
 
 }
