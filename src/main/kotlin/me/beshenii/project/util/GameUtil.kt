@@ -35,7 +35,10 @@ fun Location.setBlockDestruction(source: Player, progress: Int, showToEveryone: 
     }
 }
 
-
 @Serializable
 class PlayerSave
+
+fun hostQueue() {
+
+}
 

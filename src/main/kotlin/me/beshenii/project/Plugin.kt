@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var plugin: Plugin
 
-var cur_game: Nothing? = null
+var cur_game: String? = null
 
 class Plugin : JavaPlugin() {
 

@@ -9,9 +9,11 @@ version = "0.1"
 
 repositories {
     mavenCentral()
+    maven("https://libraries.minecraft.net")
 }
 
 dependencies {
+    implementation("com.mojang:brigadier:1.0.18")
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")

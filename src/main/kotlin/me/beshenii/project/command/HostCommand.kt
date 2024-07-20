@@ -1,5 +1,6 @@
 package me.beshenii.project.command
 
+import me.beshenii.project.cur_game
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -11,7 +12,7 @@ object HostCommand : CommandExecutor, TabCompleter {
         val game = args[0].lowercase()
         when (game) {
             "столбы" -> {
-
+                cur_game = "Столбы"
             }
         }
         return true
@@ -29,7 +30,7 @@ object HostCommand : CommandExecutor, TabCompleter {
         if (size == 1) {
             list.add("Столбы")
         }
-        return list
+        return list.filter { it.contains(lastArg) }.toMutableList()
     }
 }
 

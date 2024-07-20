@@ -9,5 +9,4 @@ libraries:
 
 commands:
   host:
-    permission: *
-
+    permission: minecraft.*
