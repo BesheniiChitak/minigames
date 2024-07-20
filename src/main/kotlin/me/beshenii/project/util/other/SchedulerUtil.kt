@@ -15,3 +15,7 @@ val Duration.inWholeTicks get() = inWholeMilliseconds / 50
 fun runTaskLater(delay: Int, action: BukkitTask.() -> Unit) {
     Bukkit.getScheduler().runTaskLater(plugin, Consumer { it.action() }, delay.toLong())
 }
+
+fun runTaskAsync(action: BukkitTask.() -> Unit) {
+    Bukkit.getScheduler().runTaskAsynchronously(plugin, action)
+}

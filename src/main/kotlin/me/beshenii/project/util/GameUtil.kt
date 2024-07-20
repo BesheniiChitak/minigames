@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import me.beshenii.project.bossbar
 import me.beshenii.project.util.other.*
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.Component.translatable
 import net.kyori.adventure.title.TitlePart
 import net.minecraft.core.BlockPos
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket
@@ -183,7 +184,9 @@ fun gameHandler() {
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (cur_game == "Столбы") item = itemEntries.random()
-                        player.inventory.addItem(ItemStack(item))
+                        val stack = ItemStack(item)
+                        player.inventory.addItem(stack)
+                        player.sendActionBar(text(" + ") + translatable(stack.translationKey()))
                         player.showBossBar(bossbar)
                     }
                 }
