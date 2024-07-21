@@ -53,7 +53,7 @@ var game_players: MutableList<Player> = mutableListOf()
 var max_players = 0
 var min_players = 0
 
-val defaultSettings = mutableMapOf("pillarsTimer" to "15", "pillarsEqual" to "true")
+val defaultSettings = mutableMapOf("pillarsTimer" to "15", "pillarsEqual" to "false")
 val settings = defaultSettings
 
 val queue_join = item(Material.GRAY_DYE) {
@@ -183,6 +183,8 @@ fun gameHandler() {
     when (cur_game) {
         "Столбы" -> {
             val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toIntOrNull() ?: 15
+            val equal = settings["pillarsEqual"] ?: false
+
             var timer = needed/2
             runTaskTimer(1.seconds) {
                 timer++
@@ -192,7 +194,7 @@ fun gameHandler() {
                     timer = 0
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
-                        if (cur_game == "Столбы") item = itemEntries.random()
+                        if (equal != "true") item = itemEntries.random()
                         val stack = ItemStack(item)
                         player.inventory.addItem(stack)
                         player.sendActionBar(text(" + ") + translatable(stack.translationKey()))
