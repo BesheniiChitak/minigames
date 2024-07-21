@@ -94,7 +94,7 @@ fun hostQueue() {
         if (size < min_players) {
             timer = max
             server.sendActionBar(
-                text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players/$max_players]").color(
+                text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players] {max $max_players}").color(
                     0x878787
                 )
             )

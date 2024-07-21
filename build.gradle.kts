@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "me.beshenii"
-version = "0.1"
+version = "1.1"
 
 repositories {
     mavenCentral()
