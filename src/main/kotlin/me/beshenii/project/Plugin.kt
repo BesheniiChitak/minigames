@@ -5,6 +5,7 @@ import me.beshenii.project.StatsLoad.save
 import me.beshenii.project.command.HelpCommand
 import me.beshenii.project.command.HostCommand
 import me.beshenii.project.command.SettingCommand
+import me.beshenii.project.util.gameEnd
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
@@ -30,6 +31,8 @@ class Plugin : JavaPlugin() {
         plugin.getCommand("f1nnyhelp")!!.setExecutor(HelpCommand)
 
         server.commandMap.getCommand("plugins")?.permission = "*"
+
+        gameEnd()
     }
 
     override fun onDisable() {

@@ -94,7 +94,7 @@ fun hostQueue() {
         if (size < min_players) {
             timer = max
             server.sendActionBar(
-                text("Недостаточно игроков для отсчёта. ") + text("[$size/$min_players] {max $max_players}").color(
+                text("Недостаточно игроков для отсчёта. ") + text("[$size/$max_players] {min $min_players}").color(
                     0x878787
                 )
             )
@@ -103,10 +103,14 @@ fun hostQueue() {
             if (size == max_players && timer > 5) {
                 timer = 5
             }
-            server.sendActionBar(text("Игра начнётся через ") + text("$timer секунд.").color(0x91dceb))
+            server.sendActionBar(
+                text("Игра начнётся через ") + text("$timer секунд. ").color(0x91dceb) + text("[$size/$max_players]").color(
+                    0x878787
+                )
+            )
             var pitch = 1f
             if (timer <= 10) {
-                pitch += (10f-timer)/10f
+                pitch += (10f - timer) / 10f
             }
             Bukkit.getOnlinePlayers().forEach { player: Player ->
                 player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, pitch)
@@ -136,9 +140,6 @@ fun gameRun() {
     cur_status = "running"
 
     val name = "game"
-
-    Bukkit.unloadWorld(name, false)
-    File(Bukkit.getWorldContainer(), name).deleteRecursively()
 
     val gameWorld = Bukkit.createWorld(WorldCreator(name).apply {
         type(WorldType.FLAT)
@@ -173,7 +174,15 @@ fun gameRun() {
 }
 
 typealias M = Material
-val disallowed = listOf(M.AIR, Material.VOID_AIR, Material.CAVE_AIR, Material.COMMAND_BLOCK, Material.CHAIN_COMMAND_BLOCK, Material.REPEATING_COMMAND_BLOCK)
+
+val disallowed = listOf(
+    M.AIR,
+    Material.VOID_AIR,
+    Material.CAVE_AIR,
+    Material.COMMAND_BLOCK,
+    Material.CHAIN_COMMAND_BLOCK,
+    Material.REPEATING_COMMAND_BLOCK
+)
 
 val itemEntries = Material.entries.apply {
     this.toMutableList().removeAll(disallowed)
@@ -182,16 +191,16 @@ val itemEntries = Material.entries.apply {
 fun gameHandler() {
     when (cur_game) {
         "Столбы" -> {
-            val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toIntOrNull() ?: 15
+            val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toFloatOrNull() ?: 15f
             val equal = settings["pillarsEqual"] ?: false
 
-            var timer = needed/2
-            runTaskTimer(1.seconds) {
-                timer++
-                bossbar.progress(timer/15f)
+            var timer = 0f
+            runTaskTimer(0.25.seconds) {
+                timer += 0.25f
+                bossbar.progress(timer / needed)
                 bossbar.name(text("До следующего предмета"))
-                if (timer == 15) {
-                    timer = 0
+                if (timer >= needed) {
+                    timer = 0f
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (equal != "true") item = itemEntries.random()
@@ -223,5 +232,12 @@ fun gameEnd() {
     Bukkit.getOnlinePlayers().forEach { player: Player ->
         player.reset()
         player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
+    }
+
+    runTaskLater(5) {
+        val name = "game"
+
+        Bukkit.unloadWorld(name, false)
+        File(Bukkit.getWorldContainer(), name).deleteRecursively()
     }
 }
