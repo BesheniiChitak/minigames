@@ -191,7 +191,24 @@ val disallowed = listOf(
     Material.JIGSAW,
 )
 
-val itemEntries = Material.entries.toMutableList() - disallowed
+lateinit var itemEntries: MutableList<Material>
+
+fun initialize() {
+    itemEntries = Material.entries.toMutableList()
+    itemEntries.removeAll(disallowed)
+
+    val world = Bukkit.getWorld("world") ?: return
+
+    val iterator = itemEntries.iterator()
+
+    while (iterator.hasNext()) {
+        val item: Material = iterator.next()
+
+        if (!item.isEnabledByFeature(world) || item.isLegacy || item.isAir || item.isEmpty) {
+            iterator.remove()
+        }
+    }
+}
 
 fun gameHandler() {
 
@@ -212,9 +229,6 @@ fun gameHandler() {
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (equal != "true") item = itemEntries.random()
-                        while (!item.isEnabledByFeature(gameWorld)) {
-                            item = itemEntries.random()
-                        }
                         val stack = ItemStack(item)
                         player.inventory.addItem(stack)
                         player.sendActionBar(text(" + ") + translatable(stack.translationKey()))

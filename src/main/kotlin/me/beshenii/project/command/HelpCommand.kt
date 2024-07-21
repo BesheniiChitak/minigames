@@ -12,7 +12,7 @@ object HelpCommand : CommandExecutor, TabCompleter {
     override fun onCommand(sender: CommandSender, command: Command, s: String, args: Array<String>): Boolean {
         if (args.isNotEmpty()) return false
         sender.sendMessage("")
-        sender.sendMessage(text(" Помощь по настройкам миниигр. (/setting <настройка> <значение>)").color(light_blue))
+        sender.sendMessage(text(" Помощь по настройкам миниигр.\n   [/setting <настройка> <значение>]").color(light_blue))
         sender.sendMessage("")
         sender.sendMessage(text("  - pillarsEqual [По умолчанию false] » В столбах все получают одинаковые предметы.").color(light_blue))
         sender.sendMessage(text("  - pillarsTimer [По умолчанию 15] » Отсчёт до следующего предмета в столбах.").color(light_blue))
