@@ -2,6 +2,7 @@ package me.beshenii.project.util
 
 import kotlinx.serialization.Serializable
 import me.beshenii.project.bossbar
+import me.beshenii.project.itemEntries
 import me.beshenii.project.util.other.*
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.Component.translatable
@@ -141,6 +142,9 @@ fun gameRun() {
 
     val name = "game"
 
+    Bukkit.unloadWorld(name, false)
+    File(Bukkit.getWorldContainer(), name).deleteRecursively()
+
     val gameWorld = Bukkit.createWorld(WorldCreator(name).apply {
         type(WorldType.FLAT)
         generatorSettings("""{"layers":[],"biome":"the_void"}""")
@@ -173,20 +177,16 @@ fun gameRun() {
     gameHandler()
 }
 
-typealias M = Material
-
 val disallowed = listOf(
-    M.AIR,
+    Material.AIR,
     Material.VOID_AIR,
     Material.CAVE_AIR,
     Material.COMMAND_BLOCK,
     Material.CHAIN_COMMAND_BLOCK,
-    Material.REPEATING_COMMAND_BLOCK
+    Material.REPEATING_COMMAND_BLOCK,
+    Material.JIGSAW
 )
 
-val itemEntries = Material.entries.apply {
-    this.toMutableList().removeAll(disallowed)
-}
 
 fun gameHandler() {
     when (cur_game) {
@@ -232,12 +232,5 @@ fun gameEnd() {
     Bukkit.getOnlinePlayers().forEach { player: Player ->
         player.reset()
         player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
-    }
-
-    runTaskLater(5) {
-        val name = "game"
-
-        Bukkit.unloadWorld(name, false)
-        File(Bukkit.getWorldContainer(), name).deleteRecursively()
     }
 }

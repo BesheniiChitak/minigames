@@ -5,10 +5,12 @@ import me.beshenii.project.StatsLoad.save
 import me.beshenii.project.command.HelpCommand
 import me.beshenii.project.command.HostCommand
 import me.beshenii.project.command.SettingCommand
+import me.beshenii.project.util.disallowed
 import me.beshenii.project.util.gameEnd
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var plugin: Plugin
@@ -17,9 +19,14 @@ val games = listOf("Столбы")
 
 val bossbar = BossBar.bossBar(text(""), 1f, BossBar.Color.RED, BossBar.Overlay.NOTCHED_10)
 
+val itemEntries = Material.entries.toMutableList()
+
 class Plugin : JavaPlugin() {
 
     override fun onEnable() {
+
+        itemEntries.removeAll(disallowed)
+
         plugin = this
 
         load()
@@ -31,8 +38,6 @@ class Plugin : JavaPlugin() {
         plugin.getCommand("f1nnyhelp")!!.setExecutor(HelpCommand)
 
         server.commandMap.getCommand("plugins")?.permission = "*"
-
-        gameEnd()
     }
 
     override fun onDisable() {
