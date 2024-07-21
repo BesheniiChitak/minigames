@@ -53,7 +53,8 @@ var game_players: MutableList<Player> = mutableListOf()
 var max_players = 0
 var min_players = 0
 
-val settings = mutableMapOf<String, String>()
+val defaultSettings = mutableMapOf("pillarsTimer" to "15", "pillarsEqual" to "true")
+val settings = defaultSettings
 
 val queue_join = item(Material.GRAY_DYE) {
     this.displayName(plain("Войти в очередь"))
@@ -105,7 +106,7 @@ fun hostQueue() {
             server.sendActionBar(text("Игра начнётся через ") + text("$timer секунд.").color(0x91dceb))
             var pitch = 1f
             if (timer <= 10) {
-                pitch += timer/10
+                pitch += (10f-timer)/10f
             }
             Bukkit.getOnlinePlayers().forEach { player: Player ->
                 player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, pitch)
@@ -148,12 +149,12 @@ fun gameRun() {
     val size = game_players.size
 
     when (cur_game) {
-        "Столбы", "Столбы_2" -> {
+        "Столбы" -> {
             val center = Location(gameWorld, 0.0, 32.0, 0.0)
             val vector = Vector(0.6, 0.0, 0.0)
             for (i in 1..size) {
                 vector.rotateAroundY(360.0 / size)
-                val move = vector.clone().multiply(20 * size / 2)
+                val move = vector.clone().multiply(30 * size / 2)
                 val pos = center.add(move)
                 for (y in -64..32) {
                     pos.y = y.toDouble()
@@ -171,12 +172,18 @@ fun gameRun() {
     gameHandler()
 }
 
-val itemEntries = Material.entries
+typealias M = Material
+val disallowed = listOf(M.AIR, Material.VOID_AIR, Material.CAVE_AIR, Material.COMMAND_BLOCK, Material.CHAIN_COMMAND_BLOCK, Material.REPEATING_COMMAND_BLOCK)
+
+val itemEntries = Material.entries.apply {
+    this.toMutableList().removeAll(disallowed)
+}
 
 fun gameHandler() {
     when (cur_game) {
-        "Столбы", "Столбы_2" -> {
-            var timer = 12
+        "Столбы" -> {
+            val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toIntOrNull() ?: 15
+            var timer = needed/2
             runTaskTimer(1.seconds) {
                 timer++
                 bossbar.progress(timer/15f)
@@ -197,19 +204,22 @@ fun gameHandler() {
                 if (size == 1) {
                     server.sendMessage(text("Победитель: ") + text(game_players[0].name).color(0xc091eb))
                 } else if (size == 0) {
-                    server.sendMessage(text("Все игроки умерли, нет победителя!").color(0xeb91a8))
+                    server.sendMessage(text("Все игроки умерли, нет победителя!").color(red))
                 }
                 if (size <= 1) {
-                    cur_status = null
-                    cur_game = null
+                    gameEnd()
                     it.cancel()
-                    Bukkit.getOnlinePlayers().forEach { player: Player ->
-                        player.reset()
-                        player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
-                    }
                 }
             }
         }
     }
 }
 
+fun gameEnd() {
+    cur_status = null
+    cur_game = null
+    Bukkit.getOnlinePlayers().forEach { player: Player ->
+        player.reset()
+        player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
+    }
+}
