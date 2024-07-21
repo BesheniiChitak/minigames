@@ -37,6 +37,9 @@ fun Player.reset() {
     this.teleport(Bukkit.getWorld("world")!!.spawnLocation)
     this.gameMode = GameMode.ADVENTURE
 
+    this.isInvulnerable = true
+    this.totalExperience = 0
+
     this.hideBossBar(bossbar)
 
     when (cur_status) {

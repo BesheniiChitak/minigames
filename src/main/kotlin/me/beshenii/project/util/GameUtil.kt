@@ -2,7 +2,6 @@ package me.beshenii.project.util
 
 import kotlinx.serialization.Serializable
 import me.beshenii.project.bossbar
-import me.beshenii.project.itemEntries
 import me.beshenii.project.util.other.*
 import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.Component.translatable
@@ -135,6 +134,8 @@ fun gameRun() {
         it.inventory.clear()
         if (it !in queue_players) {
             it.inventory.setItem(4, spectate)
+        } else {
+            it.isInvulnerable = false
         }
     }
 
@@ -148,7 +149,9 @@ fun gameRun() {
     val gameWorld = Bukkit.createWorld(WorldCreator(name).apply {
         type(WorldType.FLAT)
         generatorSettings("""{"layers":[],"biome":"the_void"}""")
-    })
+    }) ?: return
+
+    gameWorld.difficulty = Difficulty.HARD
 
     game_players = queue_players
     val size = game_players.size
@@ -170,6 +173,7 @@ fun gameRun() {
                 val player = game_players[i - 1]
                 player.teleport(pos)
                 player.gameMode = GameMode.SURVIVAL
+                player.showBossBar(bossbar)
             }
         }
     }
@@ -184,11 +188,15 @@ val disallowed = listOf(
     Material.COMMAND_BLOCK,
     Material.CHAIN_COMMAND_BLOCK,
     Material.REPEATING_COMMAND_BLOCK,
-    Material.JIGSAW
+    Material.JIGSAW,
 )
 
+val itemEntries = Material.entries.toMutableList() - disallowed
 
 fun gameHandler() {
+
+    val gameWorld = Bukkit.getWorld("game") ?: return
+
     when (cur_game) {
         "Столбы" -> {
             val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toFloatOrNull() ?: 15f
@@ -204,10 +212,12 @@ fun gameHandler() {
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (equal != "true") item = itemEntries.random()
+                        while (!item.isEnabledByFeature(gameWorld)) {
+                            item = itemEntries.random()
+                        }
                         val stack = ItemStack(item)
                         player.inventory.addItem(stack)
                         player.sendActionBar(text(" + ") + translatable(stack.translationKey()))
-                        player.showBossBar(bossbar)
                     }
                 }
                 val size = game_players.size

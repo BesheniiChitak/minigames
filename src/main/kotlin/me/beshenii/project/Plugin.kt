@@ -19,14 +19,9 @@ val games = listOf("Столбы")
 
 val bossbar = BossBar.bossBar(text(""), 1f, BossBar.Color.RED, BossBar.Overlay.NOTCHED_10)
 
-val itemEntries = Material.entries.toMutableList()
-
 class Plugin : JavaPlugin() {
 
     override fun onEnable() {
-
-        itemEntries.removeAll(disallowed)
-
         plugin = this
 
         load()
