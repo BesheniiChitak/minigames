@@ -54,7 +54,7 @@ var max_players = 0
 var min_players = 0
 
 val defaultSettings = mutableMapOf("pillarsTimer" to "15", "pillarsEqual" to "false")
-val settings = defaultSettings
+val settings = defaultSettings.clone()
 
 val queue_join = item(Material.GRAY_DYE) {
     this.displayName(plain("Войти в очередь"))
@@ -113,7 +113,7 @@ fun hostQueue() {
                 pitch += (10f - timer) / 10f
             }
             Bukkit.getOnlinePlayers().forEach { player: Player ->
-                player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, pitch)
+                player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5f, pitch)
                 if (timer <= 10 && player !in queue_players && size < max_players) {
                     player.sendTitlePart(TitlePart.SUBTITLE, text("Ты не в очереди!").color(0xd68d8d))
                 }
@@ -152,15 +152,16 @@ fun gameRun() {
     }) ?: return
 
     gameWorld.difficulty = Difficulty.HARD
+    gameWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true)
 
     game_players = queue_players
-    val size = game_players.size
+    val size = game_players.size-1
 
     when (cur_game) {
         "Столбы" -> {
             val center = Location(gameWorld, 0.0, 32.0, 0.0)
             val vector = Vector(0.6, 0.0, 0.0)
-            for (i in 1..size) {
+            for (i in 0..size) {
                 vector.rotateAroundY(360.0 / size)
                 val move = vector.clone().multiply(30 * size / 2)
                 val pos = center.add(move)
@@ -170,7 +171,7 @@ fun gameRun() {
                 }
                 pos.y = 33.5
 
-                val player = game_players[i - 1]
+                val player = game_players[i]
                 player.teleport(pos)
                 player.gameMode = GameMode.SURVIVAL
                 player.showBossBar(bossbar)
@@ -182,9 +183,6 @@ fun gameRun() {
 }
 
 val disallowed = listOf(
-    Material.AIR,
-    Material.VOID_AIR,
-    Material.CAVE_AIR,
     Material.COMMAND_BLOCK,
     Material.CHAIN_COMMAND_BLOCK,
     Material.REPEATING_COMMAND_BLOCK,
@@ -204,7 +202,7 @@ fun initialize() {
     while (iterator.hasNext()) {
         val item: Material = iterator.next()
 
-        if (!item.isEnabledByFeature(world) || item.isLegacy || item.isAir || item.isEmpty) {
+        if (!item.isEnabledByFeature(world) || item.isLegacy || item.isEmpty || item.itemTranslationKey == null) {
             iterator.remove()
         }
     }
@@ -229,6 +227,7 @@ fun gameHandler() {
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (equal != "true") item = itemEntries.random()
+                        while (item.blockTranslationKey == null && rand(1, 4) == 1) item = itemEntries.random()
                         val stack = ItemStack(item)
                         player.inventory.addItem(stack)
                         player.sendActionBar(text(" + ") + translatable(stack.translationKey()))

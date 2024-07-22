@@ -49,6 +49,10 @@ object SettingCommand : CommandExecutor, TabCompleter {
                 val bools = listOf("true", "false")
                 if (show in bools) list.addAll(bools)
                 else list.add(show)
+                val other = settings[args[0]] ?: show
+                if (show != other) {
+                    list.add(other)
+                }
             }
         }
         return list.toMutableList()

@@ -2,6 +2,7 @@ package me.beshenii.project
 
 import me.beshenii.project.util.*
 import me.beshenii.project.util.other.reset
+import me.beshenii.project.util.other.runTaskLater
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
@@ -11,9 +12,12 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerCommandSendEvent
+import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.persistence.PersistentDataType
 
@@ -23,8 +27,6 @@ object GlobalListener : Listener {
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
         player.reset()
-
-
     }
 
     @EventHandler
@@ -40,7 +42,7 @@ object GlobalListener : Listener {
         val player = event.player
         if (player in game_players) {
             game_players.remove(player)
-            player.reset()
+            runTaskLater(2) { player.reset() }
         }
     }
 
@@ -52,6 +54,32 @@ object GlobalListener : Listener {
             event.isCancelled = true
         } else {
             if (event.whoClicked.world.name == "world") {
+                event.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler
+    fun onPlayerSwapHandItems(event: PlayerSwapHandItemsEvent) {
+        val item = event.mainHandItem ?: return
+        val container = item.itemMeta?.persistentDataContainer ?: return
+        if (container[key("queue"), PersistentDataType.STRING] != null) {
+            event.isCancelled = true
+        } else {
+            if (event.player.world.name == "world") {
+                event.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler
+    fun onPlayerDropItem(event: PlayerDropItemEvent) {
+        val item = event.itemDrop.itemStack
+        val container = item.itemMeta?.persistentDataContainer ?: return
+        if (container[key("queue"), PersistentDataType.STRING] != null) {
+            event.isCancelled = true
+        } else {
+            if (event.player.world.name == "world") {
                 event.isCancelled = true
             }
         }
@@ -94,6 +122,14 @@ object GlobalListener : Listener {
             if (event.player.world.name == "world") {
                 event.isCancelled = true
             }
+        }
+    }
+
+    @EventHandler
+    fun onPlayerMove(event: PlayerMoveEvent) {
+        val player = event.player
+        if (player.y < -16.0 && player.world.name == "game" && player in game_players) {
+            player.health = 0.0
         }
     }
 }

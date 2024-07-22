@@ -38,7 +38,12 @@ fun Player.reset() {
     this.gameMode = GameMode.ADVENTURE
 
     this.isInvulnerable = true
-    this.totalExperience = 0
+
+    this.exp = 0f
+    this.level = 0
+
+    this.health = 20.0
+    this.clearActivePotionEffects()
 
     this.hideBossBar(bossbar)
 
@@ -46,4 +51,10 @@ fun Player.reset() {
         "queue" -> this.inventory.setItem(4, queue_join)
         "running" -> this.inventory.setItem(4, spectate)
     }
+}
+
+fun <K, V> MutableMap<K, V>.clone(): MutableMap<K, V> {
+    val map = LinkedHashMap<K, V>()
+    for ((k, v) in this) map[k] = v
+    return map
 }
