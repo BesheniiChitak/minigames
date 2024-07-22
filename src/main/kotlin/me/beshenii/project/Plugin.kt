@@ -5,6 +5,7 @@ import me.beshenii.project.StatsLoad.save
 import me.beshenii.project.command.HelpCommand
 import me.beshenii.project.command.HostCommand
 import me.beshenii.project.command.SettingCommand
+import me.beshenii.project.command.StopCommand
 import me.beshenii.project.util.disallowed
 import me.beshenii.project.util.gameEnd
 import me.beshenii.project.util.initialize
@@ -33,6 +34,7 @@ class Plugin : JavaPlugin() {
         plugin.getCommand("host")!!.setExecutor(HostCommand)
         plugin.getCommand("setting")!!.setExecutor(SettingCommand)
         plugin.getCommand("f1nnyhelp")!!.setExecutor(HelpCommand)
+        plugin.getCommand("stopgame")!!.setExecutor(StopCommand)
 
         server.commandMap.getCommand("plugins")?.permission = "*"
     }

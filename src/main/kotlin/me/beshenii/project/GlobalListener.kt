@@ -1,12 +1,16 @@
 package me.beshenii.project
 
+import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent
 import me.beshenii.project.util.*
 import me.beshenii.project.util.other.reset
 import me.beshenii.project.util.other.runTaskLater
+import net.minecraft.world.entity.LightningBolt
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.LightningStrike
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -42,8 +46,13 @@ object GlobalListener : Listener {
         val player = event.player
         if (player in game_players) {
             game_players.remove(player)
-            runTaskLater(2) { player.reset() }
+            player.world.spawnEntity(player.location, EntityType.LIGHTNING)
         }
+    }
+
+    @EventHandler
+    fun onPlayerPostRespawn(event: PlayerPostRespawnEvent) {
+        runTaskLater(1) { event.player.reset() }
     }
 
     @EventHandler
@@ -61,7 +70,7 @@ object GlobalListener : Listener {
 
     @EventHandler
     fun onPlayerSwapHandItems(event: PlayerSwapHandItemsEvent) {
-        val item = event.mainHandItem ?: return
+        val item = event.offHandItem ?: return
         val container = item.itemMeta?.persistentDataContainer ?: return
         if (container[key("queue"), PersistentDataType.STRING] != null) {
             event.isCancelled = true

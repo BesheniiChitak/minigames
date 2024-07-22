@@ -53,7 +53,9 @@ var game_players: MutableList<Player> = mutableListOf()
 var max_players = 0
 var min_players = 0
 
-val defaultSettings = mutableMapOf("pillarsTimer" to "15", "pillarsEqual" to "false")
+var stop = false
+
+val defaultSettings = mutableMapOf("pillarsTimer" to "8", "pillarsEqual" to "false")
 val settings = defaultSettings.clone()
 
 val queue_join = item(Material.GRAY_DYE) {
@@ -75,6 +77,7 @@ val spectate = item(Material.MAGENTA_DYE) {
 class PlayerSave
 
 fun hostQueue() {
+    stop = false
     val players = Bukkit.getOnlinePlayers()
     queue_players = mutableListOf()
     players.forEach { player: Player ->
@@ -90,6 +93,13 @@ fun hostQueue() {
     val server = Bukkit.getServer()
 
     runTaskTimer(1.seconds) {
+
+        if (stop) {
+            server.sendMessage(text("Очередь была остановлена"))
+            gameEnd()
+            it.cancel()
+        }
+
         val size = queue_players.size
         if (size < min_players) {
             timer = max
@@ -152,19 +162,24 @@ fun gameRun() {
     }) ?: return
 
     gameWorld.difficulty = Difficulty.HARD
+
     gameWorld.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true)
+    gameWorld.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false)
+    gameWorld.setGameRule(GameRule.DO_INSOMNIA, false)
+    gameWorld.setGameRule(GameRule.KEEP_INVENTORY, true)
 
     game_players = queue_players
-    val size = game_players.size-1
+    val size = game_players.size
 
     when (cur_game) {
         "Столбы" -> {
-            val center = Location(gameWorld, 0.0, 32.0, 0.0)
-            val vector = Vector(0.6, 0.0, 0.0)
-            for (i in 0..size) {
-                vector.rotateAroundY(360.0 / size)
-                val move = vector.clone().multiply(30 * size / 2)
-                val pos = center.add(move)
+            val rotate = 360.0 / size
+            val center = Location(gameWorld, 0.5, 32.5, 0.5)
+            val vector = Vector(1.0, 0.0, 0.0)
+            for (i in 0..<size) {
+                vector.rotateAroundY(rotate)
+                val move = vector.clone().multiply(8 + size / 1.5)
+                val pos = center.clone().add(move)
                 for (y in -64..32) {
                     pos.y = y.toDouble()
                     pos.block.type = Material.BEDROCK
@@ -182,35 +197,7 @@ fun gameRun() {
     gameHandler()
 }
 
-val disallowed = listOf(
-    Material.COMMAND_BLOCK,
-    Material.CHAIN_COMMAND_BLOCK,
-    Material.REPEATING_COMMAND_BLOCK,
-    Material.JIGSAW,
-)
-
-lateinit var itemEntries: MutableList<Material>
-
-fun initialize() {
-    itemEntries = Material.entries.toMutableList()
-    itemEntries.removeAll(disallowed)
-
-    val world = Bukkit.getWorld("world") ?: return
-
-    val iterator = itemEntries.iterator()
-
-    while (iterator.hasNext()) {
-        val item: Material = iterator.next()
-
-        if (!item.isEnabledByFeature(world) || item.isLegacy || item.isEmpty || item.itemTranslationKey == null) {
-            iterator.remove()
-        }
-    }
-}
-
 fun gameHandler() {
-
-    val gameWorld = Bukkit.getWorld("game") ?: return
 
     when (cur_game) {
         "Столбы" -> {
@@ -219,6 +206,13 @@ fun gameHandler() {
 
             var timer = 0f
             runTaskTimer(0.25.seconds) {
+
+                if (stop) {
+                    Bukkit.getServer().sendMessage(text("Игра была остановлена"))
+                    gameEnd()
+                    it.cancel()
+                }
+
                 timer += 0.25f
                 bossbar.progress(timer / needed)
                 bossbar.name(text("До следующего предмета"))
@@ -227,7 +221,7 @@ fun gameHandler() {
                     var item = itemEntries.random()
                     game_players.forEach { player: Player ->
                         if (equal != "true") item = itemEntries.random()
-                        while (item.blockTranslationKey == null && rand(1, 4) == 1) item = itemEntries.random()
+                        while (item.blockTranslationKey == null && rand(1, 6) == 1) item = itemEntries.random()
                         val stack = ItemStack(item)
                         player.inventory.addItem(stack)
                         player.sendActionBar(text(" + ") + translatable(stack.translationKey()))
@@ -252,8 +246,41 @@ fun gameHandler() {
 fun gameEnd() {
     cur_status = null
     cur_game = null
-    Bukkit.getOnlinePlayers().forEach { player: Player ->
-        player.reset()
-        player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
+    runTaskLater(2) {
+        Bukkit.getOnlinePlayers().forEach { player: Player ->
+            player.reset()
+            player.playSound(player, Sound.ENTITY_FIREWORK_ROCKET_BLAST, 2f, 1f)
+        }
+    }
+}
+
+val disallowed = listOf(
+    Material.COMMAND_BLOCK,
+    Material.CHAIN_COMMAND_BLOCK,
+    Material.REPEATING_COMMAND_BLOCK,
+    Material.JIGSAW,
+    Material.COMMAND_BLOCK_MINECART,
+    Material.DEBUG_STICK,
+    Material.ENCHANTED_BOOK,
+    Material.WRITTEN_BOOK,
+    Material.STRUCTURE_VOID
+)
+
+lateinit var itemEntries: MutableList<Material>
+
+fun initialize() {
+    itemEntries = Material.entries.toMutableList()
+    itemEntries.removeAll(disallowed)
+
+    val world = Bukkit.getWorld("world") ?: return
+
+    val iterator = itemEntries.iterator()
+
+    while (iterator.hasNext()) {
+        val item: Material = iterator.next()
+
+        if (!item.isEnabledByFeature(world) || item.isLegacy || item.isEmpty || item.itemTranslationKey == null) {
+            iterator.remove()
+        }
     }
 }

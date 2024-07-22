@@ -45,6 +45,8 @@ fun Player.reset() {
     this.health = 20.0
     this.clearActivePotionEffects()
 
+    this.enderChest.clear()
+
     this.hideBossBar(bossbar)
 
     when (cur_status) {
