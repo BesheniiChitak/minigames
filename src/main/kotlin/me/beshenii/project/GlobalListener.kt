@@ -4,24 +4,16 @@ import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent
 import me.beshenii.project.util.*
 import me.beshenii.project.util.other.reset
 import me.beshenii.project.util.other.runTaskLater
-import net.minecraft.world.entity.LightningBolt
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
-import org.bukkit.entity.LightningStrike
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.player.PlayerCommandSendEvent
-import org.bukkit.event.player.PlayerDropItemEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerSwapHandItemsEvent
+import org.bukkit.event.player.*
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.persistence.PersistentDataType
 
@@ -70,7 +62,7 @@ object GlobalListener : Listener {
 
     @EventHandler
     fun onPlayerSwapHandItems(event: PlayerSwapHandItemsEvent) {
-        val item = event.offHandItem ?: return
+        val item = event.offHandItem
         val container = item.itemMeta?.persistentDataContainer ?: return
         if (container[key("queue"), PersistentDataType.STRING] != null) {
             event.isCancelled = true
@@ -137,7 +129,7 @@ object GlobalListener : Listener {
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         val player = event.player
-        if (player.y < -16.0 && player.world.name == "game" && player in game_players) {
+        if (player.y < -32.0 && player.world.name == "game" && player in game_players) {
             player.health = 0.0
         }
     }

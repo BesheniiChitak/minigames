@@ -19,6 +19,9 @@ import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
+import org.bukkit.potion.PotionType
 import org.bukkit.util.Vector
 import java.io.File
 import kotlin.time.Duration.Companion.seconds
@@ -173,13 +176,12 @@ fun gameRun() {
 
     when (cur_game) {
         "Столбы" -> {
-            val rotate = 360.0 / size
+            val rotate = Math.toRadians(360.0 / size)
             val center = Location(gameWorld, 0.5, 32.5, 0.5)
-            val vector = Vector(1.0, 0.0, 0.0)
+            val vector = Vector(7.0 + size, 0.0, 0.0)
             for (i in 0..<size) {
                 vector.rotateAroundY(rotate)
-                val move = vector.clone().multiply(8 + size / 1.5)
-                val pos = center.clone().add(move)
+                val pos = center.clone().add(vector)
                 for (y in -64..32) {
                     pos.y = y.toDouble()
                     pos.block.type = Material.BEDROCK
@@ -187,7 +189,18 @@ fun gameRun() {
                 pos.y = 33.5
 
                 val player = game_players[i]
+
+                player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 20 ,10))
+                player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 20 ,-10))
+
+                player.isInvulnerable = true
+
+                runTaskLater(25) {
+                    player.isInvulnerable = false
+                }
+
                 player.teleport(pos)
+
                 player.gameMode = GameMode.SURVIVAL
                 player.showBossBar(bossbar)
             }

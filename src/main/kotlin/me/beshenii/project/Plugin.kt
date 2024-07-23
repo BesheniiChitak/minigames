@@ -6,13 +6,10 @@ import me.beshenii.project.command.HelpCommand
 import me.beshenii.project.command.HostCommand
 import me.beshenii.project.command.SettingCommand
 import me.beshenii.project.command.StopCommand
-import me.beshenii.project.util.disallowed
-import me.beshenii.project.util.gameEnd
 import me.beshenii.project.util.initialize
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component.text
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.plugin.java.JavaPlugin
 
 lateinit var plugin: Plugin

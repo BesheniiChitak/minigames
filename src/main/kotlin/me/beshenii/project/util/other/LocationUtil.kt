@@ -7,7 +7,7 @@ fun Location.posOffset(x : Double, y : Double, z : Double) : Location {
     return Location(this.world, this.x+x, this.y+y, this.z+z)
 }
 
-fun stringToLocation(location: String) : Location {
+fun toLocation(location: String) : Location {
     val split = location.split(", ")
     return Location(Bukkit.getWorld(split[0]), split[1].toDouble(), split[2].toDouble(), split[3].toDouble())
 }
