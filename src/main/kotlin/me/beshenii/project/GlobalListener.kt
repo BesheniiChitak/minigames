@@ -129,8 +129,15 @@ object GlobalListener : Listener {
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         val player = event.player
-        if (player.y < -32.0 && player.world.name == "game" && player in game_players) {
-            player.health = 0.0
+        if (player.y < -32.0 && player.world.name == "game") {
+            if (player in game_players) {
+                player.health = 0.0
+            } else {
+                val loc = player.location
+                loc.y = 34.0
+
+                player.teleport(loc)
+            }
         }
     }
 }
