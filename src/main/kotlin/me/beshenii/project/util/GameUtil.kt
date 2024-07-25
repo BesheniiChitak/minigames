@@ -142,7 +142,6 @@ fun hostQueue() {
 }
 
 fun gameRun() {
-
     Bukkit.getOnlinePlayers().forEach {
         it.inventory.clear()
         if (it !in queue_players) {
@@ -171,10 +170,10 @@ fun gameRun() {
     gameWorld.setGameRule(GameRule.DO_INSOMNIA, false)
     gameWorld.setGameRule(GameRule.KEEP_INVENTORY, true)
 
-    gameWorld.worldBorder.size = 150.0
-
     game_players = queue_players
     val size = game_players.size
+
+    gameWorld.worldBorder.size = 125.0 + (10 * size)
 
     when (cur_game) {
         "Столбы" -> {
@@ -218,13 +217,13 @@ fun gameHandler() {
 
     when (cur_game) {
         "Столбы" -> {
-            val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toFloatOrNull() ?: 15f
+            val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toFloatOrNull() ?: 6f
             val equal = settings["pillarsEqual"] ?: false
 
             var timer = 0f
             runTaskTimer(0.25.seconds) {
 
-                gameWorld.worldBorder.size -= 0.025
+                gameWorld.worldBorder.size -= 0.075
 
                 if (stop) {
                     Bukkit.getServer().sendMessage(text("Игра была остановлена"))
