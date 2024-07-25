@@ -171,6 +171,8 @@ fun gameRun() {
     gameWorld.setGameRule(GameRule.DO_INSOMNIA, false)
     gameWorld.setGameRule(GameRule.KEEP_INVENTORY, true)
 
+    gameWorld.worldBorder.size = 150.0
+
     game_players = queue_players
     val size = game_players.size
 
@@ -212,6 +214,8 @@ fun gameRun() {
 
 fun gameHandler() {
 
+    val gameWorld = Bukkit.getWorld("game") ?: return
+
     when (cur_game) {
         "Столбы" -> {
             val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toFloatOrNull() ?: 15f
@@ -219,6 +223,8 @@ fun gameHandler() {
 
             var timer = 0f
             runTaskTimer(0.25.seconds) {
+
+                gameWorld.worldBorder.size -= 0.025
 
                 if (stop) {
                     Bukkit.getServer().sendMessage(text("Игра была остановлена"))

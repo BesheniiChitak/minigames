@@ -19,6 +19,9 @@ fun Player.reset() {
     this.level = 0
 
     this.health = 20.0
+    this.foodLevel = 20
+    this.saturation = 20f
+
     this.clearActivePotionEffects()
 
     this.enderChest.clear()

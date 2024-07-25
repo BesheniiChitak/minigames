@@ -2,6 +2,7 @@ package me.beshenii.project
 
 import com.destroystokyo.paper.event.player.PlayerPostRespawnEvent
 import me.beshenii.project.util.*
+import me.beshenii.project.util.other.plain
 import me.beshenii.project.util.other.reset
 import me.beshenii.project.util.other.runTaskLater
 import org.bukkit.Bukkit
@@ -11,6 +12,7 @@ import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.*
@@ -40,11 +42,12 @@ object GlobalListener : Listener {
             game_players.remove(player)
             player.world.spawnEntity(player.location, EntityType.LIGHTNING)
         }
+        player.reset()
     }
 
     @EventHandler
     fun onPlayerPostRespawn(event: PlayerPostRespawnEvent) {
-        runTaskLater(1) { event.player.reset() }
+        runTaskLater(5) { event.player.reset() }
     }
 
     @EventHandler
@@ -129,15 +132,24 @@ object GlobalListener : Listener {
     @EventHandler
     fun onPlayerMove(event: PlayerMoveEvent) {
         val player = event.player
-        if (player.y < -32.0 && player.world.name == "game") {
+        if (player.y < -48.0 && player.world.name == "game") {
             if (player in game_players) {
-                player.health = 0.0
-            } else {
-                val loc = player.location
-                loc.y = 34.0
-
-                player.teleport(loc)
+                game_players.remove(player)
+                player.gameMode = GameMode.SPECTATOR
             }
+            val loc = player.location
+            loc.y = 34.0
+
+            player.teleport(loc)
         }
     }
+
+    @EventHandler
+    fun onBlockPlace(event: BlockPlaceEvent) {
+        if (event.block.location.y >= 64) {
+            event.isCancelled
+            event.player.sendActionBar(plain("Граница по высоте!"))
+        }
+    }
+
 }

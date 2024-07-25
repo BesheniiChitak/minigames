@@ -30,7 +30,7 @@ class Plugin : JavaPlugin() {
 
         plugin.getCommand("host")!!.setExecutor(HostCommand)
         plugin.getCommand("setting")!!.setExecutor(SettingCommand)
-        plugin.getCommand("f1nnyhelp")!!.setExecutor(HelpCommand)
+        plugin.getCommand("helpgame")!!.setExecutor(HelpCommand)
         plugin.getCommand("stopgame")!!.setExecutor(StopCommand)
 
         server.commandMap.getCommand("plugins")?.permission = "*"
