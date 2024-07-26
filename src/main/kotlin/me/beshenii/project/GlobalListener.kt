@@ -146,7 +146,7 @@ object GlobalListener : Listener {
 
     @EventHandler
     fun onBlockPlace(event: BlockPlaceEvent) {
-        if (event.block.location.y >= 64) {
+        if (event.block.location.y >= 48) {
             event.isCancelled
             event.player.sendActionBar(plain("Граница по высоте!"))
         }

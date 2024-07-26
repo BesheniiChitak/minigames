@@ -173,7 +173,28 @@ fun gameRun() {
     game_players = queue_players
     val size = game_players.size
 
-    gameWorld.worldBorder.size = 125.0 + (10 * size)
+    val border = gameWorld.worldBorder
+
+    border.size = 100.0 + (10 * size)
+    border.warningDistance = -1
+    border.damageBuffer = 0.0
+
+    var timer = 0
+
+    runTaskTimer(1.seconds) {
+
+        if (cur_game == null) {
+            it.cancel()
+        }
+
+        timer++
+        if (timer == 45) {
+
+            border.setSize(7.0, (125 + (25 * size)).toLong())
+
+            it.cancel()
+        }
+    }
 
     when (cur_game) {
         "Столбы" -> {
@@ -191,8 +212,8 @@ fun gameRun() {
 
                 val player = game_players[i]
 
-                player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 20 ,10))
-                player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 20 ,-10))
+                player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 20, 10))
+                player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 20, -10))
 
                 player.isInvulnerable = true
 
@@ -213,8 +234,6 @@ fun gameRun() {
 
 fun gameHandler() {
 
-    val gameWorld = Bukkit.getWorld("game") ?: return
-
     when (cur_game) {
         "Столбы" -> {
             val needed = (settings["pillarsTimer"] ?: defaultSettings["pillarsTimer"])?.toFloatOrNull() ?: 6f
@@ -222,8 +241,6 @@ fun gameHandler() {
 
             var timer = 0f
             runTaskTimer(0.25.seconds) {
-
-                gameWorld.worldBorder.size -= 0.075
 
                 if (stop) {
                     Bukkit.getServer().sendMessage(text("Игра была остановлена"))
